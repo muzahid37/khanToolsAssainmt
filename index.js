@@ -23,7 +23,13 @@ async function run(){
           const tools = await cursor.toArray();
           res.send(tools);
       });
-    
+      app.get('/tool/:id', async (req, res) => {
+        const id = req.params.id;
+        console.log(id);
+        const query = {_id:ObjectId(id)};
+        const purchase = await toolCollection.findOne(query);
+        res.send(purchase);    
+    });
       // const serviceCollection = client.db("car-warehouse").collection("car-items");
 
       // app.get("/inventory", async (req, res) => {
