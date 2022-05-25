@@ -32,19 +32,23 @@ async function run(){
         const purchase = await toolCollection.findOne(query);
         res.send(purchase);    
     });
+   
+    app.get('/booking', async(req, res) =>{
+      const user=req.query.user;
+        const query = {user: user};
+        const bookings = await bookingCollection.find(query).toArray();
+       
+        res.send(bookings)
+     
+     
+     
+    })
     app.post('/booking', async(req,res)=>{
       const booking=req.body;
       const result=await bookingCollection.insertOne(booking);
       res.send(result);
-    })
-      // const serviceCollection = client.db("car-warehouse").collection("car-items");
-
-      // app.get("/inventory", async (req, res) => {
-      //   const query = {};
-      //   const cursor = serviceCollection.find(query);
-      //   const services = await cursor.toArray();
-      //   res.send(services);
-      // });
+    });
+      
 
 
   }
