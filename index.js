@@ -1,6 +1,6 @@
 const express = require("express");
 const cors = require("cors");
-// const jwt = require('jsonwebtoken');
+const jwt = require('jsonwebtoken');
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const app = express();
 require("dotenv").config();
@@ -16,6 +16,20 @@ const client = new MongoClient(uri, {
   useUnifiedTopology: true,
   serverApi: ServerApiVersion.v1,
 });
+function verifyJWT(req,res,next){
+  const authHeader=req.headers.authorization;
+  if(!authHeader){
+    return res.status(401).send({message:'UnAuthorized access'});
+  }
+  const token=authHeader.split(' ')[1];
+  jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, function(err, decoded) {
+    if(err){
+      return res.status(403).send({message:'Forbidden access'});
+    }
+    req.decoded=decoded;
+    next();
+  });
+}
 
 async function run() {
   try {
@@ -44,7 +58,8 @@ async function run() {
     
     app.get("/booking", async(req,res)=>{
       const user=req.query.user;
-      console.log(user);
+      const authorization=req.headers.authorization;
+      console.log('auth header',authorization);
       const query={user:user}
       const bookings=await bookingCollection.findOne(query);
       res.send(bookings);
@@ -66,7 +81,25 @@ async function run() {
       const result = await reviewCollection.insertOne(booking);
       res.send(result);
     });
-    app.get('/user', async(req,res)=>{
+    app.get('/admin/:email'),async(res,req)=>{
+      const email=req.params.email;
+      const user=await usersCollection.findOne({email:email});
+      const isAdmin=user.role==='admin';
+      res.send({admin:isAdmin});
+    }
+    app.put('/user/admin/:email', async (req, res) => {
+      const email = req.params.email;
+      const filter = { email: email };
+      const updateDoc = {
+        $set: {role:'admin'},
+      };
+      const result = await usersCollection.updateOne(filter, updateDoc);
+     
+      res.send(result);
+      
+     
+    });
+    app.get('/user',verifyJWT, async(req,res)=>{
       const users=await usersCollection.find().toArray();
       res.send(users);
     })
@@ -79,10 +112,10 @@ async function run() {
         $set: user,
       };
       const result = await usersCollection.updateOne(filter, updateDoc, options);
-      // const token = jwt.sign({email: email }, process.env.ACCESS_TOKEN_SECRET,{ expiresIn: '1h' }); 
-      res.send(result);
+      const token = jwt.sign({email: email }, process.env.ACCESS_TOKEN_SECRET,{ expiresIn: '1h' }); 
+      // res.send(result);
       
-      // res.send({result, token});
+      res.send({result, token});
     })  
     app.get("/profile", async (req, res) => {
       const query = {};
