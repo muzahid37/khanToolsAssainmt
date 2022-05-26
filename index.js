@@ -24,6 +24,7 @@ async function run() {
     const reviewCollection = client.db("tools-managements").collection("reviews");
     const bookingCollection = client.db("tools-managements").collection("bookings");
     const usersCollection = client.db("tools-managements").collection("users");
+    const profileCollection = client.db("tools-managements").collection("profile");
 
     app.get("/tool", async (req, res) => {
       const query = {};
@@ -82,7 +83,12 @@ async function run() {
       res.send(result);
       
       // res.send({result, token});
-    })    
+    })  
+    app.post("/profile", async (req, res) => {
+      const profile = req.body;
+      const result = await profileCollection.insertOne(profile);
+      res.send(result);
+    });  
 
 
   } finally {
