@@ -84,6 +84,13 @@ async function run() {
       
       // res.send({result, token});
     })  
+    app.get("/profile", async (req, res) => {
+      const query = {};
+      // console.log(query)
+      const cursor = profileCollection.find(query);
+      const profileData = await cursor.toArray();
+      res.send(profileData);
+    });
     app.post("/profile", async (req, res) => {
       const profile = req.body;
       const result = await profileCollection.insertOne(profile);
