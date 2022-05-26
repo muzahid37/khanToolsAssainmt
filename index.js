@@ -1,8 +1,8 @@
 const express = require("express");
 const cors = require("cors");
+// const jwt = require('jsonwebtoken');
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const app = express();
-const jwt = require('jsonwebtoken');
 require("dotenv").config();
 const port = process.env.PORT || 5000;
 
@@ -40,13 +40,7 @@ async function run() {
       res.send(purchase);
     });
 
-    // app.get("/booking", async (req, res) => {
-    //   const user = req.query.user;
-    //   const query = { user: user };
-    //   const bookings = await bookingCollection.find(query).toArray();
-
-    //   res.send(bookings);
-    // });
+    
     app.get("/booking", async(req,res)=>{
       const user=req.query.user;
       console.log(user);
@@ -71,24 +65,12 @@ async function run() {
       const result = await reviewCollection.insertOne(booking);
       res.send(result);
     });
-    // app.get('/user', async(req,res)=>{
-    //   const users=await usersCollection.find().toArray();
-    //   res.send(users);
-    // })
-    // app.put('user/:email', async(req,res)=>{
-    //   const email=req.params.email;
-    //   const user=req.body;
-    //   const filter={email:email};
-    //   const option={upsert:true};
-    //   const updateDoc = {
-    //     $set: user,
-    //   };
-    //   const result=await usersCollection.updateOne(filter,updateDoc,option);
-    //   res.send(result);
-    // })
+    app.get('/user', async(req,res)=>{
+      const users=await usersCollection.find().toArray();
+      res.send(users);
+    })
     app.put('/user/:email', async (req, res) => {
       const email = req.params.email;
-      
       const user = req.body;
       const filter = { email: email };
       const options = { upsert: true };
@@ -96,9 +78,10 @@ async function run() {
         $set: user,
       };
       const result = await usersCollection.updateOne(filter, updateDoc, options);
-       const token = jwt.sign({email: email }, process.env.ACCESS_TOKEN_SECRET,{ expiresIn: '1h' }); 
+      // const token = jwt.sign({email: email }, process.env.ACCESS_TOKEN_SECRET,{ expiresIn: '1h' }); 
+      res.send(result);
       
-      res.send({result, token});
+      // res.send({result, token});
     })    
 
 
