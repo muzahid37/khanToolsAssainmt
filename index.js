@@ -2,6 +2,7 @@ const express = require("express");
 const cors = require("cors");
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const app = express();
+const jwt = require('jsonwebtoken');
 require("dotenv").config();
 const port = process.env.PORT || 5000;
 
@@ -48,8 +49,9 @@ async function run() {
     // });
     app.get("/booking", async(req,res)=>{
       const user=req.query.user;
+      console.log(user);
       const query={user:user}
-      const bookings=await bookingCollection.find(query).toArray();
+      const bookings=await bookingCollection.findOne(query);
       res.send(bookings);
 
     })
@@ -73,7 +75,31 @@ async function run() {
     //   const users=await usersCollection.find().toArray();
     //   res.send(users);
     // })
-    
+    // app.put('user/:email', async(req,res)=>{
+    //   const email=req.params.email;
+    //   const user=req.body;
+    //   const filter={email:email};
+    //   const option={upsert:true};
+    //   const updateDoc = {
+    //     $set: user,
+    //   };
+    //   const result=await usersCollection.updateOne(filter,updateDoc,option);
+    //   res.send(result);
+    // })
+    app.put('/user/:email', async (req, res) => {
+      const email = req.params.email;
+      
+      const user = req.body;
+      const filter = { email: email };
+      const options = { upsert: true };
+      const updateDoc = {
+        $set: user,
+      };
+      const result = await usersCollection.updateOne(filter, updateDoc, options);
+       const token = jwt.sign({email: email }, process.env.ACCESS_TOKEN_SECRET,{ expiresIn: '1h' }); 
+      
+      res.send({result, token});
+    })    
 
 
   } finally {
