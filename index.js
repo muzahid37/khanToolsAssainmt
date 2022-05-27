@@ -52,7 +52,7 @@ async function run() {
           res.send(result);
      
     });
-
+    // get api
     app.get("/tool/:id", async (req, res) => {
       const id = req.params.id;
       // console.log(id);
