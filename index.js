@@ -64,8 +64,6 @@ async function run() {
     
     app.get("/booking", async(req,res)=>{
       const user=req.query.user;
-      const authorization=req.headers.authorization;
-      console.log('auth header',authorization);
       const query={user:user}
       const bookings=await bookingCollection.findOne(query);
       res.send(bookings);
@@ -95,17 +93,27 @@ async function run() {
     }
     app.put('/user/admin/:email', async (req, res) => {
       const email = req.params.email;
-      const filter = { email: email };
-      const updateDoc = {
-        $set: {role:'admin'},
-      };
+      const requester=req.decoded.email;
+      const requesterAccount=await usersCollection.findOne({email:requester});
+      if(requesterAccount.role==="admin"){
+       const filter = { email: email };
+       
+       const updateDoc = {
+         $set:{role:'admin'},
+       };
       const result = await usersCollection.updateOne(filter, updateDoc);
      
       res.send(result);
+      }
+      else{
+        res.status(403).send({message:'forbidden'})
+      }
+
+      
       
      
     });
-    app.get('/user',verifyJWT, async(req,res)=>{
+    app.get('/user', async(req,res)=>{
       const users=await usersCollection.find().toArray();
       res.send(users);
     })
@@ -125,7 +133,6 @@ async function run() {
     })  
     app.get("/profile", async (req, res) => {
       const query = {};
-      // console.log(query)
       const cursor = profileCollection.find(query);
       const profileData = await cursor.toArray();
       res.send(profileData);
