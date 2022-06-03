@@ -39,6 +39,7 @@ async function run() {
     const bookingCollection = client.db("tools-managements").collection("bookings");
     const usersCollection = client.db("tools-managements").collection("users");
     const profileCollection = client.db("tools-managements").collection("profile");
+    const factoryImgCollection = client.db("tools-managements").collection("factoryImg");
 
     app.get("/tool", async (req, res) => {
       const query = {};
@@ -60,6 +61,7 @@ async function run() {
       const purchase = await toolCollection.findOne(query);
       res.send(purchase);
     });
+   
 
     
     app.get("/booking", async(req,res)=>{
@@ -91,6 +93,7 @@ async function run() {
       const isAdmin=user.role==='admin';
       res.send({admin:isAdmin});
     }
+    //admin api
     app.put('/user/admin/:email', async (req, res) => {
       const email = req.params.email;
       const requester=req.decoded.email;
